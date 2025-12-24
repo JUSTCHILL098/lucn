@@ -1,18 +1,16 @@
 "use client"
 
-import { Play } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Play } from "lucide-react"
 
 export default function EmbedTester() {
   return (
-    <section className="space-y-6 max-w-3xl">
-      <h2 className="text-xl font-semibold">Embed Tester</h2>
-
-      <div className="grid gap-4">
-        <Input placeholder="Episode ID (e.g. naruto-episode-1)" />
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Input placeholder="Episode ID" />
 
         <Select>
           <SelectTrigger>
@@ -24,19 +22,21 @@ export default function EmbedTester() {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch />
-          <span className="text-sm">Autoplay</span>
+          <span className="text-sm text-muted-foreground">Autoplay</span>
         </div>
 
-        <Button className="gap-2 w-fit">
-          <Play size={16} /> Preview
+        <Button className="w-full">
+          <Play className="h-4 w-4 mr-2" />
+          Generate Embed
         </Button>
       </div>
 
-      <div className="border rounded-lg h-48 flex items-center justify-center text-muted-foreground">
-        iframe preview placeholder
+      {/* Preview placeholder */}
+      <div className="h-48 rounded-md bg-neutral-900 flex items-center justify-center text-sm text-neutral-500">
+        iframe preview will appear here
       </div>
-    </section>
+    </div>
   )
 }
