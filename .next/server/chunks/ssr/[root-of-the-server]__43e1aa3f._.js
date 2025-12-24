@@ -1,0 +1,3 @@
+module.exports=[49746,a=>{a.v({className:"geist_mono_7d293927-module__JAMDPq__className",variable:"geist_mono_7d293927-module__JAMDPq__variable"})},98421,a=>{"use strict";var b=a.i(7997),c=a.i(49746);let d={className:c.default.className,style:{fontFamily:"'Geist Mono', 'Geist Mono Fallback'",fontStyle:"normal"}};function e({children:a}){return(0,b.jsx)("html",{lang:"en",className:"dark",children:(0,b.jsx)("body",{className:`${d.variable} font-mono bg-background text-foreground`,children:a})})}null!=c.default.variable&&(d.variable=c.default.variable),a.s(["default",()=>e,"metadata",0,{title:"Hianime Video API",description:"Developer documentation for Hianime Video API"}],98421)}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__43e1aa3f._.js.map
