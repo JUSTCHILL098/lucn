@@ -1,10 +1,10 @@
-import { Share2, Heart, Caption } from "lucide-react"
+import { Share2, Heart, Captions } from "lucide-react"
 
 export default function Footer() {
   return (
     <footer className="border-t pt-6 flex justify-between items-center text-sm text-muted-foreground">
       <span className="flex items-center gap-2">
-        <Caption size={14} />
+        <Captions size={14} />
         Hianime Video API
       </span>
 
