@@ -4,7 +4,7 @@ export default function Footer() {
       {/* Top row */}
       <div className="flex justify-between items-center text-sm">
         <span className="font-bold text-white">
-          NAME
+          LUNAR
         </span>
 
         <nav className="flex gap-6 font-normal">
@@ -26,7 +26,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom row */}
-      <div className="text-xs">
+      <div className="text-xs text-center">
         © 2025 name. All rights reserved.
       </div>
     </footer>
