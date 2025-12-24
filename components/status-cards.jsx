@@ -1,6 +1,6 @@
 import {
   Eye,
-  Audio2,
+  Volume2,
   Users,
   Zap,
   TriangleAlert,
@@ -8,7 +8,7 @@ import {
 
 const stats = [
   { icon: Eye, label: "Preview Ready" },
-  { icon: Audio2, label: "Multi-Audio" },
+  { icon: Volume2, label: "Audio Available" },
   { icon: Users, label: "High Usage" },
   { icon: Zap, label: "Fast Performance" },
   { icon: TriangleAlert, label: "No Major Incidents" },
@@ -22,7 +22,7 @@ export default function StatusCards() {
           key={s.label}
           className="border rounded-lg p-4 flex flex-col items-center gap-2"
         >
-          <s.icon />
+          <s.icon size={18} />
           <span className="text-sm text-muted-foreground">
             {s.label}
           </span>
