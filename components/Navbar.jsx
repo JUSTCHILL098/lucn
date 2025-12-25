@@ -57,7 +57,7 @@ const IconMark = ({ className }) => (
   <div className={cn("w-7 h-7 bg-white rounded-full", className)} />
 );
 
-export function Navbar({ items }) {
+export default function Navbar({ items }) {
   const [mounted, setMounted] = useState(false);
   const [hovered, setHovered] = useState(null);
   const [active, setActive] = useState(items[0]?.name || "Home");
