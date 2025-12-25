@@ -5,193 +5,247 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
-/* utils                                                                      */
+/* utils */
 /* -------------------------------------------------------------------------- */
 
 const cn = (...c) => c.filter(Boolean).join(" ");
 
-const defaultItems = [
-  { name: "Home", url: "/" },
-  { name: "Docs", url: "/docs" },
-  { name: "Embed", url: "/embed" },
-  { name: "Status", url: "/status" },
-];
-
-const Cookies = {
-  get(name) {
-    if (typeof document === "undefined") return null;
-    return document.cookie
-      .split("; ")
-      .find((r) => r.startsWith(name + "="))
-      ?.split("=")[1];
-  },
-  set(name, value, days = 365) {
-    const d = new Date();
-    d.setTime(d.getTime() + days * 86400000);
-    document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/`;
-  },
-};
-
 /* -------------------------------------------------------------------------- */
-/* logo                                                                       */
+/* Navbar */
 /* -------------------------------------------------------------------------- */
 
-function LunarLogo({ className }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M11.0174 2.80157C6.37072 3.29221 2.75 7.22328 2.75 12C2.75 13.1448 2.95764 14.2397 3.33685 15.25H12.8489C10.1562 14.1916 8.25 11.5684 8.25 8.5C8.25 6.18738 9.33315 4.1283 11.0174 2.80157ZM22.75 16C22.75 16.4142 22.4142 16.75 22 16.75H2C1.58579 16.75 1.25 16.4142 1.25 16C1.25 15.6688 1.46468 15.3877 1.76248 15.2884C1.4296 14.2513 1.25 13.1461 1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C12.7166 1.25 13.0754 1.82126 13.1368 2.27627C13.196 2.71398 13.0342 3.27065 12.531 3.57467C10.8627 4.5828 9.75 6.41182 9.75 8.5C9.75 11.6756 12.3244 14.25 15.5 14.25C17.5882 14.25 19.4172 13.1373 20.4253 11.469C20.7293 10.9658 21.286 10.804 21.7237 10.8632C22.1787 10.9246 22.75 11.2834 22.75 12C22.75 13.1461 22.5704 14.2513 22.2375 15.2884C22.5353 15.3877 22.75 15.6688 22.75 16Z"
-      />
-    </svg>
-  );
-}
+export default function Navbar({ items }) {
+  /* ---------------------------- SAFETY FIRST ---------------------------- */
+  const safeItems = Array.isArray(items) ? items : [];
 
-/* -------------------------------------------------------------------------- */
-/* navbar                                                                     */
-/* -------------------------------------------------------------------------- */
-
-export default function Navbar({ items = defaultItems }) {
+  /* ------------------------------ STATE -------------------------------- */
   const [mounted, setMounted] = useState(false);
-  const [mobile, setMobile] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(items[0]?.name);
-  const [purple, setPurple] = useState(false);
+  const [active, setActive] = useState(
+    safeItems[0]?.name ?? "Home"
+  );
+  const [hovered, setHovered] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  /* ------------------------------ EFFECTS ------------------------------ */
   useEffect(() => {
     setMounted(true);
 
-    const resize = () => setMobile(window.innerWidth < 768);
-    resize();
-    window.addEventListener("resize", resize);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
 
-    if (Cookies.get("provider") === "dark") setPurple(true);
-
-    return () => window.removeEventListener("resize", resize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   if (!mounted) return null;
 
+  /* -------------------------------------------------------------------------- */
+  /* JSX */
+  /* -------------------------------------------------------------------------- */
+
   return (
     <>
-      {/* NAVBAR */}
+      {/* =============================== NAVBAR =============================== */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center">
         <div
           className={cn(
-            "relative flex items-center gap-3 px-5 py-3 rounded-full",
-            "backdrop-blur-xl border border-white/10 shadow-2xl",
-            purple
-              ? "bg-purple-950/60 shadow-purple-600/40"
-              : "bg-black/60"
+            "relative flex items-center gap-3 rounded-full bg-black/60 backdrop-blur-xl shadow-xl",
+            "px-4 py-3 font-mono",
+            isMobile ? "w-[92%] justify-between" : "w-auto"
           )}
         >
-          {/* LOGO */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            onClick={() => {
-              Cookies.set("provider", "dark");
-              setPurple(true);
-            }}
-            className="flex items-center gap-2"
-          >
-            <LunarLogo
-              className={cn(
-                "h-7 w-7",
-                purple ? "text-purple-400" : "text-indigo-400"
-              )}
+          {/* ----------------------------- LOGO ----------------------------- */}
+          <div className="flex items-center gap-2">
+            <motion.div
+              className="w-7 h-7 rounded-full bg-indigo-500"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
             />
-            <span className="font-mono font-bold text-white text-lg">
-              {"LUNAR".split("").map((l, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                >
-                  {l}
-                </motion.span>
-              ))}
+            <span className="font-bold text-white tracking-wide">
+              LUNAR
             </span>
-          </motion.button>
+          </div>
 
-          {/* LINKS */}
-          {!mobile && (
-            <div className="flex items-center ml-6">
-              {items.map((item) => {
-                const activeTab = active === item.name;
+          {/* ------------------------- DESKTOP NAV ------------------------- */}
+          {!isMobile && (
+            <div className="relative ml-6 flex items-center gap-2">
+              {safeItems.map((item) => {
+                const isActive = active === item.name;
+
                 return (
-                  <button
+                  <div
                     key={item.name}
-                    onClick={() => {
-                      setActive(item.name);
-                      window.location.href = item.url;
-                    }}
-                    className={cn(
-                      "relative px-6 py-3 font-mono text-sm",
-                      activeTab
-                        ? "text-white"
-                        : "text-white/60 hover:text-white"
-                    )}
+                    className="relative"
+                    onMouseEnter={() => setHovered(item.name)}
+                    onMouseLeave={() => setHovered(null)}
                   >
-                    {/* mascot */}
-                    {activeTab && (
-                      <>
-                        <motion.div
-                          layoutId="glow"
-                          className={cn(
-                            "absolute inset-0 rounded-full blur-xl -z-10",
-                            purple
-                              ? "bg-purple-600/60"
-                              : "bg-indigo-600/60"
-                          )}
-                        />
-                        <motion.div
-                          className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs"
-                          animate={{ y: [0, -6, 0] }}
-                          transition={{ repeat: Infinity, duration: 1.8 }}
-                        >
-                          🐱‍🌙
-                        </motion.div>
-                      </>
+                    {/* Mascot Animation when Active */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="anime-mascot"
+                        className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none"
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                        }}
+                      >
+                        <div className="relative w-12 h-12">
+                          <motion.div
+                            className="absolute w-10 h-10 bg-white rounded-full left-1/2 -translate-x-1/2"
+                            animate={
+                              hovered === item.name
+                                ? {
+                                    scale: [1, 1.1, 1],
+                                    rotate: [0, -5, 5, 0],
+                                    transition: {
+                                      duration: 0.5,
+                                      ease: "easeInOut",
+                                    },
+                                  }
+                                : {
+                                    y: [0, -3, 0],
+                                    transition: {
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      ease: "easeInOut",
+                                    },
+                                  }
+                            }
+                          >
+                            {/* Eyes */}
+                            <motion.div
+                              className="absolute w-2 h-2 bg-black rounded-full"
+                              animate={
+                                hovered === item.name
+                                  ? {
+                                      scaleY: [1, 0.2, 1],
+                                      transition: { duration: 0.2 },
+                                    }
+                                  : {}
+                              }
+                              style={{ left: "25%", top: "40%" }}
+                            />
+                            <motion.div
+                              className="absolute w-2 h-2 bg-black rounded-full"
+                              animate={
+                                hovered === item.name
+                                  ? {
+                                      scaleY: [1, 0.2, 1],
+                                      transition: { duration: 0.2 },
+                                    }
+                                  : {}
+                              }
+                              style={{ right: "25%", top: "40%" }}
+                            />
+
+                            {/* Blush */}
+                            <div
+                              className="absolute w-2 h-1.5 bg-pink-300 rounded-full"
+                              style={{ left: "15%", top: "55%" }}
+                            />
+                            <div
+                              className="absolute w-2 h-1.5 bg-pink-300 rounded-full"
+                              style={{ right: "15%", top: "55%" }}
+                            />
+
+                            {/* Mouth */}
+                            <motion.div
+                              className="absolute w-4 h-2 border-b-2 border-black rounded-full"
+                              animate={
+                                hovered === item.name
+                                  ? { scaleY: 1.4, y: -1 }
+                                  : { scaleY: 1, y: 0 }
+                              }
+                              style={{ left: "30%", top: "60%" }}
+                            />
+
+                            {/* Sparkles */}
+                            <AnimatePresence>
+                              {hovered === item.name && (
+                                <>
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0 }}
+                                    className="absolute -top-1 -right-1 text-yellow-300"
+                                  >
+                                    ✨
+                                  </motion.div>
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="absolute -top-2 left-0 text-yellow-300"
+                                  >
+                                    ✨
+                                  </motion.div>
+                                </>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        </div>
+                      </motion.div>
                     )}
-                    {item.name}
-                  </button>
+
+                    {/* Nav Button */}
+                    <a
+                      href={item.url}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setActive(item.name);
+                      }}
+                      className={cn(
+                        "relative z-10 rounded-full px-6 py-3 text-sm font-semibold transition",
+                        isActive
+                          ? "bg-white text-black"
+                          : "text-white/70 hover:text-white"
+                      )}
+                    >
+                      {item.name}
+                    </a>
+                  </div>
                 );
               })}
             </div>
           )}
 
-          {/* MOBILE */}
-          {mobile && (
-            <button onClick={() => setOpen(!open)}>
-              {open ? <X /> : <Menu />}
+          {/* ------------------------- MOBILE BUTTON ------------------------- */}
+          {isMobile && (
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-1.5 text-white"
+            >
+              {mobileOpen ? <X /> : <Menu />}
             </button>
           )}
         </div>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* ============================= MOBILE MENU ============================= */}
       <AnimatePresence>
-        {mobile && open && (
+        {isMobile && mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-24 left-4 right-4 z-40 bg-black/90 border border-white/10 rounded-2xl p-4 backdrop-blur-xl"
+            exit={{ opacity: 0, y: -12 }}
+            className="fixed top-24 left-4 right-4 z-40 rounded-2xl bg-black/90 p-4 backdrop-blur-xl"
           >
-            {items.map((item) => (
-              <button
+            {safeItems.map((item) => (
+              <a
                 key={item.name}
-                onClick={() => {
+                href={item.url}
+                onClick={(e) => {
+                  e.preventDefault();
                   setActive(item.name);
-                  setOpen(false);
-                  window.location.href = item.url;
+                  setMobileOpen(false);
                 }}
-                className="block w-full text-left px-4 py-3 text-white/80 hover:bg-white/10 rounded-lg"
+                className="block rounded-lg px-4 py-3 text-white/80 hover:text-white"
               >
                 {item.name}
-              </button>
+              </a>
             ))}
           </motion.div>
         )}
