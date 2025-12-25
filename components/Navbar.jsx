@@ -45,13 +45,13 @@ const DrawerContent = ({ className, children }) => (
 
 /* -------------------------------- navbar -------------------------------- */
 
-export default function Navbar({ items }) {
-  // 🔥 IMPORTANT: make items safe for prerender
+export default function Navbar({ items = [] }) {
+  // 🔒 SSR / prerender safe
   const safeItems = Array.isArray(items) ? items : [];
 
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(
-    safeItems.length > 0 ? safeItems[0].name : "Home"
+    safeItems[0]?.name ?? "Home"
   );
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
