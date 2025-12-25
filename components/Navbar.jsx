@@ -25,7 +25,7 @@ const TextReveal = ({ text, by = "word", className = "" }) => {
   )
 }
 
-export function Navbar({
+export default function Navbar({
   items,
   className,
   defaultActive = "Home",
