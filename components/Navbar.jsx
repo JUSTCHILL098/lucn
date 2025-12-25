@@ -2,23 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Home, BookOpen, Settings } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
-// Utility functions
+/* -------------------------------- utilities -------------------------------- */
+
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const CookieMock = {
-  get: (key) => {
-    return typeof window !== "undefined" ? localStorage.getItem(key) : null;
-  },
-  set: (key, value, { expires } = {}) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(key, value);
-    }
-  },
-};
+/* -------------------------------- drawer -------------------------------- */
 
-// Simple Drawer mock
 const Drawer = ({ open, onOpenChange, children }) => (
   <AnimatePresence>
     {open && (
@@ -44,7 +35,7 @@ const DrawerContent = ({ className, children }) => (
     animate={{ opacity: 1, scale: 1, y: 0 }}
     exit={{ opacity: 0, scale: 0.95, y: 10 }}
     className={cn(
-      "relative w-full max-w-sm overflow-hidden rounded-lg border bg-zinc-900 p-6 shadow-lg",
+      "relative w-full max-w-sm rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-lg",
       className
     )}
   >
@@ -52,139 +43,134 @@ const DrawerContent = ({ className, children }) => (
   </motion.div>
 );
 
-// IconMark placeholder
-const IconMark = ({ className }) => (
-  <div className={cn("w-7 h-7 bg-white rounded-full", className)} />
-);
+/* -------------------------------- navbar -------------------------------- */
 
-export default function Navbar({ items }) {
+export function Navbar({ items }) {
+  // 🔥 IMPORTANT: make items safe for prerender
+  const safeItems = Array.isArray(items) ? items : [];
+
   const [mounted, setMounted] = useState(false);
-  const [hovered, setHovered] = useState(null);
-  const [active, setActive] = useState(items[0]?.name || "Home");
+  const [active, setActive] = useState(
+    safeItems.length > 0 ? safeItems[0].name : "Home"
+  );
   const [isMobile, setIsMobile] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [providerOpen, setProviderOpen] = useState(false);
-  const [iconColor, setIconColor] = useState("bg-indigo-500");
 
   useEffect(() => {
     setMounted(true);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleScroll);
-    };
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   if (!mounted) return null;
 
   return (
     <>
-      {/* Navbar */}
-      <div className="fixed left-0 right-0 top-6 z-50 flex justify-center">
+      {/* ---------------------------- NAVBAR BAR ---------------------------- */}
+      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center">
         <div
           className={cn(
-            "flex items-center gap-2 px-4 py-3 rounded-full font-mono bg-black/50 backdrop-blur-lg shadow-lg",
+            "flex items-center gap-3 rounded-full bg-black/60 px-4 py-3 backdrop-blur-xl shadow-lg",
             isMobile ? "w-[92%] justify-between" : "w-auto"
           )}
         >
           {/* Logo */}
           <div className="flex items-center gap-2">
             <motion.div
-              className={cn("w-7 h-7 rounded-full", iconColor)}
-              animate={{ y: [0, -5, 0], rotate: [0, 5, 0, -5, 0] }}
-              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+              className="h-7 w-7 rounded-full bg-indigo-500"
+              animate={{ y: [0, -6, 0], rotate: [0, 6, -6, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
             />
-            <span className="font-bold text-white font-mono">LUNAR</span>
+            <span className="font-mono font-bold text-white">LUNAR</span>
           </div>
 
-          {/* Desktop nav */}
+          {/* Desktop links */}
           {!isMobile && (
-            <div className="flex items-center space-x-2 ml-6">
-              {items.map((item) => {
-                const isActive = active === item.name;
-                return (
-                  <a
-                    key={item.name}
-                    href={item.url}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActive(item.name);
-                    }}
-                    onMouseEnter={() => setHovered(item.name)}
-                    onMouseLeave={() => setHovered(null)}
-                    className={cn(
-                      "relative cursor-pointer px-7 py-3.5 rounded-full font-mono text-base font-semibold transition-all duration-300",
-                      "text-white/70 hover:text-white",
-                      isActive && "text-white"
-                    )}
-                  >
-                    {item.name}
-                  </a>
-                );
-              })}
+            <div className="ml-6 flex items-center gap-2">
+              {safeItems.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.url}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActive(item.name);
+                  }}
+                  className={cn(
+                    "rounded-full px-6 py-3 text-sm font-semibold transition",
+                    active === item.name
+                      ? "bg-white text-black"
+                      : "text-white/70 hover:text-white"
+                  )}
+                >
+                  {item.name}
+                </a>
+              ))}
             </div>
           )}
 
-          {/* Mobile menu */}
+          {/* Mobile button */}
           {isMobile && (
-            <div>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-white p-1.5"
-              >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
-              <AnimatePresence>
-                {mobileMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute top-20 left-0 w-full bg-black/90 p-4 flex flex-col gap-2 rounded-2xl"
-                  >
-                    {items.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.url}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setActive(item.name);
-                          setMobileMenuOpen(false);
-                        }}
-                        className="text-white/80 hover:text-white px-3 py-2 rounded-lg"
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-1.5 text-white"
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           )}
         </div>
       </div>
 
-      {/* Provider Drawer (mock) */}
+      {/* ---------------------------- MOBILE MENU ---------------------------- */}
+      <AnimatePresence>
+        {isMobile && mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-24 left-4 right-4 z-40 rounded-2xl bg-black/90 p-4 backdrop-blur-xl"
+          >
+            {safeItems.map((item) => (
+              <a
+                key={item.name}
+                href={item.url}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActive(item.name);
+                  setMobileOpen(false);
+                }}
+                className="block rounded-lg px-4 py-3 text-white/80 hover:text-white"
+              >
+                {item.name}
+              </a>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---------------------------- DRAWER ---------------------------- */}
       <Drawer open={providerOpen} onOpenChange={setProviderOpen}>
         <DrawerContent>
-          <h2 className="text-white font-bold mb-2">Select Provider</h2>
+          <h2 className="mb-3 text-lg font-bold text-white">
+            Select Provider
+          </h2>
+
           <button
-            className="w-full mb-2 px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white"
             onClick={() => setProviderOpen(false)}
+            className="mb-2 w-full rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
           >
-            1st Provider
+            Provider 1
           </button>
+
           <button
-            className="w-full px-4 py-2 rounded border border-white text-white hover:bg-white/10"
             onClick={() => setProviderOpen(false)}
+            className="w-full rounded-lg border border-white/20 px-4 py-2 text-white hover:bg-white/10"
           >
-            2nd Provider
+            Provider 2
           </button>
         </DrawerContent>
       </Drawer>
