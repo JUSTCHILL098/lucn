@@ -45,7 +45,7 @@ const DrawerContent = ({ className, children }) => (
 
 /* -------------------------------- navbar -------------------------------- */
 
-export function Navbar({ items }) {
+export default function Navbar({ items }) {
   // 🔥 IMPORTANT: make items safe for prerender
   const safeItems = Array.isArray(items) ? items : [];
 
