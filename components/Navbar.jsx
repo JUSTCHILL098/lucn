@@ -2,14 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  X,
-  Sparkles,
-  Home,
-  BookOpen,
-  Settings,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
 /* utils                                                                      */
@@ -17,155 +10,225 @@ import {
 
 const cn = (...c) => c.filter(Boolean).join(" ");
 
+const Cookies = {
+  get(name) {
+    if (typeof document === "undefined") return null;
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  },
+  set(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 86400000);
+    document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/`;
+  },
+};
+
+/* -------------------------------------------------------------------------- */
+/* logo (YOUR SVG)                                                             */
+/* -------------------------------------------------------------------------- */
+
+function LunarLogo({ className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M11.0174 2.80157C6.37072 3.29221 2.75 7.22328 2.75 12C2.75 13.1448 2.95764 14.2397 3.33685 15.25H12.8489C10.1562 14.1916 8.25 11.5684 8.25 8.5C8.25 6.18738 9.33315 4.1283 11.0174 2.80157ZM22.75 16C22.75 16.4142 22.4142 16.75 22 16.75H2C1.58579 16.75 1.25 16.4142 1.25 16C1.25 15.6688 1.46468 15.3877 1.76248 15.2884C1.4296 14.2513 1.25 13.1461 1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C12.7166 1.25 13.0754 1.82126 13.1368 2.27627C13.196 2.71398 13.0342 3.27065 12.531 3.57467C10.8627 4.5828 9.75 6.41182 9.75 8.5C9.75 11.6756 12.3244 14.25 15.5 14.25C17.5882 14.25 19.4172 13.1373 20.4253 11.469C20.7293 10.9658 21.286 10.804 21.7237 10.8632C22.1787 10.9246 22.75 11.2834 22.75 12C22.75 13.1461 22.5704 14.2513 22.2375 15.2884C22.5353 15.3877 22.75 15.6688 22.75 16Z"
+      />
+    </svg>
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /* navbar                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export default function Navbar() {
-  const items = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Docs", href: "/docs", icon: BookOpen },
-    { name: "Settings", href: "/settings", icon: Settings },
-  ];
-
+export default function Navbar({ items }) {
   const [mounted, setMounted] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("Home");
+  const [iconColor, setIconColor] = useState("text-indigo-500");
+
+  /* easter egg */
+  const [egg, setEgg] = useState(false);
+  const [eggStep, setEggStep] = useState(0);
+  const [eggButtons, setEggButtons] = useState(false);
 
   useEffect(() => {
     setMounted(true);
 
-    const onResize = () => {
-      setMobile(window.innerWidth < 768);
-    };
+    const provider = Cookies.get("provider");
+    if (provider === "dark") setIconColor("text-purple-500");
 
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const resize = () => setMobile(window.innerWidth < 768);
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
   }, []);
 
   if (!mounted) return null;
 
+  const handleLogoClick = () => {
+    const unlocked = localStorage.getItem("lunar_unlocked");
+    if (unlocked) {
+      Cookies.set("provider", "dark");
+      setIconColor("text-purple-500");
+      setTimeout(() => location.reload(), 300);
+      return;
+    }
+
+    setEgg(true);
+    setEggStep(1);
+    setTimeout(() => setEggStep(2), 4000);
+    setTimeout(() => setEggButtons(true), 8000);
+  };
+
   return (
     <>
-      {/* ============================== NAV WRAPPER ============================== */}
+      {/* NAVBAR */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center">
-        <motion.nav
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <motion.div
           className={cn(
-            "relative flex items-center gap-4 rounded-full",
+            "flex items-center gap-3",
             "bg-black/60 backdrop-blur-xl",
             "border border-white/10 shadow-2xl",
-            mobile ? "w-[92%] px-4 py-3" : "px-6 py-3"
+            mobile
+              ? "w-[92%] px-4 py-3 rounded-3xl justify-between"
+              : "px-4 py-3 rounded-full font-mono"
           )}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
         >
-          {/* ============================== LOGO ============================== */}
-          <div className="flex items-center gap-3">
-            <motion.div
-              className="relative h-9 w-9 rounded-full bg-indigo-500"
-              animate={{
-                rotate: [0, 6, -6, 0],
-                y: [0, -4, 0],
-              }}
-              transition={{ duration: 4, repeat: Infinity }}
-            >
-              <div className="absolute inset-0 rounded-full bg-indigo-500 blur-lg opacity-60" />
-            </motion.div>
+          {/* LOGO */}
+          <motion.button
+            onClick={handleLogoClick}
+            animate={{ y: [0, -5, 0], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="flex items-center gap-2"
+          >
+            <LunarLogo className={cn("h-7 w-7", iconColor)} />
+            <span className="font-mono font-bold text-white text-lg">
+              LUNAR
+            </span>
+          </motion.button>
 
-            <div className="leading-none">
-              <div className="flex items-center gap-1">
-                <span className="font-mono text-lg font-bold tracking-wide text-white">
-                  LUNAR
-                </span>
-                <Sparkles size={14} className="text-indigo-400" />
-              </div>
-              <span className="text-[10px] tracking-widest text-white/50">
-                EMBED PLATFORM
-              </span>
-            </div>
-          </div>
-
-          {/* ============================== DESKTOP LINKS ============================== */}
+          {/* DESKTOP NAV */}
           {!mobile && (
-            <div className="ml-8 flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-4">
               {items.map((item) => {
-                const Icon = item.icon;
                 const isActive = active === item.name;
-
                 return (
                   <button
                     key={item.name}
-                    onClick={() => setActive(item.name)}
-                    className="relative"
+                    onClick={() => {
+                      setActive(item.name);
+                      window.location.href = item.url;
+                    }}
+                    className={cn(
+                      "relative px-7 py-3 rounded-full font-mono text-base transition",
+                      isActive
+                        ? "text-white"
+                        : "text-white/70 hover:text-white"
+                    )}
                   >
-                    <motion.div
-                      className={cn(
-                        "flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium",
-                        isActive
-                          ? "text-black"
-                          : "text-white/70 hover:text-white"
-                      )}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="nav-pill"
-                          className="absolute inset-0 rounded-full bg-white"
-                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                        />
-                      )}
-
-                      <span className="relative z-10 flex items-center gap-2">
-                        <Icon size={14} />
-                        {item.name}
-                      </span>
-                    </motion.div>
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full bg-white/15 blur-lg -z-10"
+                        animate={{ opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                    )}
+                    {item.name}
                   </button>
                 );
               })}
             </div>
           )}
 
-          {/* ============================== MOBILE TOGGLE ============================== */}
+          {/* MOBILE */}
           {mobile && (
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="ml-auto rounded-full p-2 text-white"
-            >
-              {open ? <X size={22} /> : <Menu size={22} />}
+            <button onClick={() => setOpen(!open)}>
+              {open ? <X /> : <Menu />}
             </button>
           )}
-        </motion.nav>
+        </motion.div>
       </div>
 
-      {/* ============================== MOBILE MENU ============================== */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {mobile && open && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-28 left-4 right-4 z-40 rounded-2xl
-                       border border-white/10 bg-black/80 backdrop-blur-xl p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed top-24 left-4 right-4 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 z-40"
           >
-            {items.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    setActive(item.name);
-                    setOpen(false);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3
-                             text-white/80 hover:bg-white/10 hover:text-white"
-                >
-                  <Icon size={16} />
-                  {item.name}
-                </button>
-              );
-            })}
+            {items.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => {
+                  setActive(item.name);
+                  setOpen(false);
+                  window.location.href = item.url;
+                }}
+                className="block w-full text-left px-4 py-3 rounded-lg text-white/80 hover:bg-white/10"
+              >
+                {item.name}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* EASTER EGG */}
+      <AnimatePresence>
+        {egg && (
+          <motion.div
+            className="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-mono text-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {eggStep === 1 && (
+              <motion.div> A cold silence lingers beneath the moonlight… </motion.div>
+            )}
+
+            {eggStep === 2 && (
+              <div className="text-center">
+                <div className="mb-8">
+                  You seek to trespass into the dark side of the lunar realm…
+                </div>
+
+                {eggButtons && (
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => setEgg(false)}
+                      className="px-6 py-3 border border-white/30 rounded-lg"
+                    >
+                      NO
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.setItem("lunar_unlocked", "true");
+                        Cookies.set("provider", "dark");
+                        location.reload();
+                      }}
+                      className="px-6 py-3 bg-indigo-600 rounded-lg"
+                    >
+                      YES
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
